@@ -1,0 +1,92 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}{{ post.title }}{% endblock %}
+{% block content %}
+<div class="container">
+    <h1>{{ post.title }}</h1>
+    <p class="date">
+        Published {{ post.publish }} by {{ post.author }}
+    </p>
+    {{ post.body|linebreaks }}
+    <hr/>
+</div>
+<br/>
+
+<div class="container">
+    {% with comments.count as total_comments %}
+    <h3>
+        {{ total_comments }} comment{{ total_comments|pluralize }}
+    </h3>
+    {% endwith %}
+    {% for comment in comments %}
+    <div class="card mb-3">
+        <div class="card-header">
+            <ul class="list-group list-group-horizontal-md">
+                <li class="list-group-item"><h5 class="card-title mb-0">Comment {{ forloop.counter }} by
+                    {{comment.name}}</h5></li>
+                <li class="list-group-item text-end">
+                    <a href="{% url 'update_comment' post.id comment.id %}">Update</a> |
+                    <a href="{% url 'delete_comment' post.id comment.id %}">Delete</a>
+                </li>
+            </ul>
+            <p class="card-text text-muted">{{ comment.created }} {% if comment.created != comment.updated%}
+                (Updated {{ comment.updated }}){% endif %}
+                <a href="{% url 'add_dependent_comment' comment.post.id comment.id %}">Reply</a>
+            </p>
+        </div>
+        <div class="card-body">
+            <p class="card-text mb-0"> {{ comment.body|linebreaks }} </p>
+        </div>
+        {% if comment.get_dependent_comments.count %}
+        <div class="accordion" id="accordionExample{{ forloop.counter }}">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                    <button aria-controls="collapse{{ forloop.counter }}" aria-expanded="true"
+                            class="accordion-button"
+                            data-bs-target="#collapse{{ forloop.counter }}"
+                            data-bs-toggle="collapse" type="button">Show answers
+                        ({{comment.get_dependent_comments.count}})
+                    </button>
+                </h2>
+                <div aria-labelledby="heading{{ forloop.counter }}" class="accordion-collapse collapse"
+                     data-bs-parent="#accordionExample"
+                     id="collapse{{ forloop.counter }}">
+                    <div class="accordion-body">
+                        {% for dependent_comment in comment.get_dependent_comments %}
+                        <div class="card col-md-5 offset-md-1 mb-3">
+                            <div class="card-header">
+                                <ul class="list-group list-group-horizontal-md">
+                                    <li class="list-group-item">
+                                        <h5 class="card-title mb-0">{{dependent_comment.name}}</h5>
+                                    </li>
+                                    <li class="list-group-item text-end">
+                                        <a href="{% url 'update_comment' post.id comment.id %}">Update</a> |
+                                        <a href="{% url 'delete_comment' post.id comment.id %}">Delete</a>
+                                    </li>
+                                </ul>
+                                <p class="card-text text-muted">{{ comment.created }}
+                                    {% if comment.created != comment.updated%}(Updated {{ comment.updated }}){% endif %}
+                                </p>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text"> {{ dependent_comment.body }} </p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% empty %}
+    <p>There are no comments</p>
+    {% endfor %}
+</div>
+
+<div class="container">
+    {% include 'blog/includes/comment_form.html' %}
+</div>
+<br/>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+
+<div class="container">
+    <h3> Post title: {{post.title}} </h3>
+    <br/>
+    <p class="mb-0">Parent comment:</p>
+    <div class="card mb-3">
+        <div class="card-header">
+            <h5 class="card-text">{{parent_comment.name}}</h5>
+            <p class="card-text text-muted">{{parent_comment.created}}</p>
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+                {{parent_comment.body}}
+            </p>
+        </div>
+    </div>
+
+    {% if form_errors %}
+    {% for field, errors in form_errors.items %}
+    {% for error in errors %}
+    <div class="alert alert-danger col-md-4" role="alert">
+        {{field}}: {{error}}
+    </div>
+    {% endfor %}
+    {% endfor %}
+    {% endif %}
+</div>
+
+
+<div class="card col-md-5 offset-md-3">
+    <div class="card-header">
+        <h2 class="card-title text-center">Add a response to a comment</h2>
+    </div>
+    <div class="card-body">
+        <form action="" method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <p><input class="btn btn-primary mb-0" type="submit" value="Add "></p>
+        </form>
+    </div>
+</div>
+
+<br/>
+
+{% endblock %}
